@@ -1,5 +1,4 @@
-# Catnap ✧/ᐠ-ꞈ-ᐟ\ —ฅ/ᐠ. ̫ .ᐟ\ฅ —
-
+# Catnap ✧/ᐠ-ꞈ-ᐟ\ 
 --------
 
 I've tried to implement my own cute little functional programming language for a long while now,

@@ -8,6 +8,10 @@ mod concrete;
 mod lex;
 mod parse;
 
+use std::fs::read_to_string;
+
+use crate::parse::*;
+
 // Cool shit: "Debugging a compiler can be anightmare. The only evidence of
 // an incorrect transformation can be a segmentation fault in a large program
 // compiled by the compiler. Identifying the cause of the crash, and tracing
@@ -60,5 +64,9 @@ pub enum Sort {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let fname = "test.ctnp";
+    let conts = read_to_string(fname).unwrap();
+    println!("{}", &conts);
+    let prgrm = parse::prgrm_parse::program(&conts);
+    dbg!(prgrm);
 }

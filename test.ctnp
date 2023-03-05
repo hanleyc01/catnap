@@ -1,0 +1,8 @@
+data fart = { fart }
+
+let { x = case (reverse xs) of
+		{ Cons -> \y ys. y
+		; Nil -> fart
+		}
+		at { Int }
+	}

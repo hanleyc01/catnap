@@ -1,8 +1,5 @@
-data fart = { fart }
-
-let { x = case (reverse xs) of
-		{ Cons -> \y ys. y
-		; Nil -> fart
+let { head : (List a -> a) := \xs . case xs of 
+		{ Cons x xx -> Just x
+		; Nil -> Nothing
 		}
-		at { Int }
 	}

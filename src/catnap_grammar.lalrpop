@@ -1,0 +1,135 @@
+use std::str::FromStr;
+use crate::concrete::*;
+
+grammar;
+
+SepList<T, Sep>: Vec<T> = {
+    <v:(<T> Sep)*> <e:T> => {
+        let mut v = v;
+        v.push(e);
+        v
+    }
+};
+
+Ident: String = <r"[a-zA-Z_][a-zA-Z0-9_']*"> => String::from(<>);
+
+IntLiteral: String = {
+    <r"-?(?:0|[1-9][0-9]*)"> => String::from(<>),
+    r"0\d" "Numbers can`t have leading zeros" => "0".to_string(),
+};
+
+FloatLiteral: String =
+    <r"-?(?:0|[1-9][0-9]*)\.[0-9]*(?:[eE]-?[0-9]+)?"> => String::from(<>);
+
+StringLiteral: String =
+    <r#""[^\\"\n\r]*(?:\\[tn'"\\][^\\"\n\r]*)*""#> => String::from(<>);
+
+Literal: Literal = {
+	StringLiteral => Literal::String(<>),
+	IntLiteral => Literal::Int(<>),
+	FloatLiteral => Literal::Float(<>),
+	"true" => Literal::Bool(true),
+	"false" => Literal::Bool(false),
+};
+
+Comment = r"#.*\n";
+
+pub Program: Program = {
+	Decl+
+};
+
+Decl: Decl = {
+	<VDecl> => Decl::VDecl(<>),
+	TDecl,
+};
+
+TDecl: Decl = {
+	"data" <name:TVar> ":=" "{" <ts:SepList<TVar, ";">> "}" => Decl::new(name, ts)
+};
+
+VDecl: VDecl = {
+	"let" "{" <b:Bind> "}" => VDecl::Let(b),
+	"letrec" "{" <bs:SepList<Bind,";">> "}" => VDecl::Letrec(bs),
+};
+
+Bind: Bind = {
+	<tv:TVar> ":=" <ex:Expr> => Bind::Assign(tv, Box::new(ex)),
+};
+
+Expr: Expr = {
+	BExpr => Expr::BExpr(<>),
+	Lam,
+	Pi,
+	BigLam,
+	Forall,
+	Arrow,
+	LocalDec,
+	CaseAt,
+	Case,
+};
+
+Lam: Expr = {
+	"\\" <ts:SepList<TVar,",">> "." <e:Expr> => Expr::Lam(ts, Box::new(e)),
+};
+
+Pi: Expr = {
+	"|~|" <ts:SepList<TVar,",">> "." <e:Expr> => Expr::Pi(ts, Box::new(e)),
+};
+
+BigLam: Expr = {
+	"/\\" <ts:SepList<TVar,",">> "." <e:Expr> => Expr::BigLam(ts, Box::new(e)),
+};
+
+Forall: Expr = {
+	"\\/" <ts:SepList<TVar,",">> "." <e:Expr> => Expr::Forall(ts, Box::new(e)),
+};
+
+Arrow: Expr = {
+	<lhs:BExpr> "->" <rhs:Expr> => Expr::Arrow(Box::new(lhs), Box::new(rhs))
+};
+
+LocalDec: Expr = {
+	<local:VDecl> "in" <e:Expr> => Expr::LocalDec(local, Box::new(e)),
+};
+
+CaseAt: Expr = {
+	"case" <e:Expr> "of" "{" <vs:SepList<Alt, ";">> "}" "at" "{" <aa:AExpr+> "}" =>
+	Expr::CaseAt(Box::new(e), vs, aa),
+};
+
+Case: Expr = {
+	"case" <e:Expr> "of" "{" <vs:SepList<Alt, ";">> "}" =>
+	Expr::Case(Box::new(e), vs),
+};
+
+BExpr: BExpr = {
+	AExpr+ => BExpr::App(<>),
+};
+
+AExpr: AExpr = {
+	"(" <e:Expr> ")" => AExpr::Expr(Box::new(e)),
+	TVar => AExpr::TVar(<>),
+	Literal => AExpr::Literal(<>),
+	"*" => AExpr::Star,
+	"box" => AExpr::Box,
+};
+
+TVar: TVar = {
+	<v:Var> ":" <ae:AExpr> => TVar::Explicit(v, Box::new(ae)),
+	<v:Var> => TVar::Implicit(v),
+};
+
+Var: Var = {
+	"_" => Var::Wild,
+	Ident => Var::Ident(<>),
+};
+
+Alt: Alt = {
+	<p:Pat> "->" <e:Expr> => Alt::Arrow(p, e),
+	<p:Pat> <ts:TVar+> "->" <e:Expr> => Alt::Many(p, ts, e),
+}
+
+Pat: Pat = {
+	TVar => Pat::TVar(<>),
+	Literal => Pat::Lit(<>),
+};

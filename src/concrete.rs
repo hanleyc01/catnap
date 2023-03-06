@@ -1,38 +1,25 @@
 #![allow(dead_code, unused)]
 
-#[derive(Debug, Clone)]
-pub struct Program {
-    type_decls: Vec<TDecl>,
-    value_decls: Vec<VDecl>,
-}
-
-impl Program {
-    pub fn new(type_decls: Vec<TDecl>, value_decls: Vec<VDecl>) -> Self {
-        Self {
-            type_decls,
-            value_decls,
-        }
-    }
-}
+pub type Program = Vec<Decl>;
 
 #[derive(Debug, Clone)]
-pub struct TDecl {
-    name: TVar,
-    values: Vec<TVar>,
+pub enum Decl {
+    TDecl { name: TVar, values: Vec<TVar> },
+    VDecl(VDecl),
 }
 
-impl TDecl {
+impl Decl {
     pub fn new(name: TVar, values: Vec<TVar>) -> Self {
-        Self { name, values }
+        Self::TDecl { name, values }
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum Literal {
     String(String),
-    Int(i32),
+    Int(String),
     Bool(bool),
-    Float(f32),
+    Float(String,),
 }
 
 #[derive(Debug, Clone)]
@@ -56,7 +43,7 @@ pub enum Expr {
     Arrow(Box<BExpr>, Box<Expr>),
     LocalDec(VDecl, Box<Expr>),
     CaseAt(Box<Expr>, Vec<Alt>, Vec<AExpr>),
-    Case(Box<Expr>, Vec<AExpr>),
+    Case(Box<Expr>, Vec<Alt>),
 }
 
 #[derive(Debug, Clone)]
@@ -66,7 +53,7 @@ pub enum BExpr {
 
 #[derive(Debug, Clone)]
 pub enum AExpr {
-    Var(TVar),
+    TVar(TVar),
     Literal(Literal),
     Star,
     Box,

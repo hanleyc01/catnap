@@ -14,8 +14,14 @@ I'll enumerate some of the goals I have in mind for the project.
 - [x] Have fun /ᐠ｡ꞈ｡ᐟ✿\
 - [ ] Learn about the Calculus of Inductive Constructions
 - [ ] Create an interpreted intermediate representation based off of [Henk](https://www.microsoft.com/en-us/research/wp-content/uploads/1997/01/henk.pdf)
-  + [ ] Get an up and running lexer
-  + [ ] Work on interpretation strategies (bytecode etc)
+  + [x] Get an up and running lexer and parser
+  + [ ] Optimize parser
+	- [ ] Fix inability to recognize multiple `tvar`'s in "application" expressions (e.g., `|~| (<tvar_1>) ... (<tvar_n>)`, or mixed parenthesized expressions
+	- [ ] Work on a framework that provides helpful and informative error messages which don't make you stare at an `unwrap`'d value for 20 minutes
+  + [ ] Typechecking of Henk programs, as well as some basic type inference (the previously referenced article which gives the Henk specification provides some basic inference rules which ought to provide some helpful tips and strategies for type inference and checking)
+  + [ ] Compilation and interpreting
+	- [ ] Investigate possible bytecode formats, in particular, check out OCaml VM, BEAM, Lua VM
+	- [ ] Possible transpiling of bytecode to LLVM or Cranelift (whole task unto itself)
   + [ ] Flesh out the standard library a bit
 - [ ] Implement core, verified kernel from which to expand to a full proof writing language
 
